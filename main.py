@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import filedialog
 
 def main():
     root = Tk()
@@ -6,11 +7,18 @@ def main():
     root.geometry('800x600')
     
     # making two frames
-    frame1 = LabelFrame(root, padx=30, pady=30)
-    frame1.grid(row=0, column=0, padx=10, pady=5)
+    frame1 = LabelFrame(root, padx=130, pady=130)
+    frame1.grid(row=0, column=0, padx=10, pady=20)
     
-    frame2 = LabelFrame(root, padx=30, pady=30)
-    frame2.grid(row=0, column=1, padx=10, pady=5)
+    frame2 = LabelFrame(root, padx=130, pady=130)
+    frame2.grid(row=0, column=1, padx=10, pady=20)
+    
+    # put image selection inside lhs frame
+    selection_buttom = Button(frame1, text="Select File")
+    selection_buttom.pack()
+    
+    label = Label(frame2, text="Result....")
+    label.pack()
     
     root.mainloop()
     
