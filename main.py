@@ -6,6 +6,10 @@ from tensorflow.keras import layers
 from tensorflow.keras.layers import Input, Add, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D, MaxPooling2D
 from tensorflow.keras.models import Model, load_model
 import os
+from not_used import load_datasets
+from tensorflow.keras.preprocessing import image_dataset_from_directory
+from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation
+from tensorflow.keras.applications import EfficientNetB0
 import numpy as np
 
 def main():
@@ -36,63 +40,42 @@ def create_model():
     '''
     This model will use skip connections since I am just learning
     '''
-    X_train, Y_train, X_test, Y_test, classes = load_datasets('dataset/training_set/training_set')  # sending dataset folder as argument (will just  going to use training dataset folder)
-    print ("number of training examples = " + str(X_train.shape[0]))
-    print ("number of test examples = " + str(X_test.shape[0]))
-    print ("X_train shape: " + str(X_train.shape))
-    print ("Y_train shape: " + str(Y_train.shape))
-    print ("X_test shape: " + str(X_test.shape))
-    print ("Y_test shape: " + str(Y_test.shape))
+    image_size =  (224, 224)
+    image_shape = image_size + (3,) # Since each picture has three channels
+    batch_size = 70
+    train_dataset = image_dataset_from_directory('dataset/training_set/training_set',
+                                                                        shuffle=True,
+                                                                        batch_size=batch_size,
+                                                                        image_size=image_size,
+                                                                        seed=40,
+                                                                        validation_split=0.2,
+                                                                        subset='training')
+    validation_dataset = image_dataset_from_directory('dataset/training_set/training_set',
+                                                                        shuffle=True,
+                                                                        batch_size=batch_size,
+                                                                        image_size=image_size,
+                                                                        seed=40,
+                                                                        validation_split=0.2,
+                                                                        subset='validation')
     
+    # Prefetch data
+    train_dataset = train_dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+    
+    
+    
+    
+    
+def data_augmentor():
+    model = tf.keras.Sequential()
+    model.add(RandomFlip('horizontal'))
+    model.add(RandomRotation(0.2))
+    return model
 
-def load_datasets(directory):
+def get_classifier_model(image_shape, augmentor=data_augmentor()):
+    model = EfficientNetB0(input_shape=image_shape,
+                           include_top=False,
+                           weights='imagenet')
     
-    # Get a list of all the classes
-    classes = os.listdir(directory)
-    
-    # Initialize lists to store data and labels
-    X_train = []
-    Y_train = []
-    X_test = []
-    Y_test = []
-    
-    # Open each class and access all the files
-    for class_index, class_name in enumerate(classes):      # We will use number for Y data as well
-        class_path = os.path.join(directory, class_name)
-        
-        # get names of all the images in current class direction
-        images = os.listdir(class_path)
-        
-        # Shuffle the images for better randomness
-        np.random.shuffle(images)  # probably doesnt matter
-        num_train = int(0.8 * len(images))   # Number of images that we will use to train model
-        
-        # Open each image and add it to our lists
-        for i, image in enumerate(images): 
-            image_path = os.path.join(class_path, image)
-            # Create 3 dimentional data of image before we add it to our arrays
-            img  = Image.open(image_path)
-            img = img.resize((64, 64))  # Make image small to make things easier
-            img = np.array(img) / 255.0
-            
-            if i < num_train: # Add first 80% of images to training dataset
-                X_train.append(img)
-                Y_train.append(class_index)
-            else:
-                X_test.append(img)
-                Y_test.append(class_index)
-    
-    # Convert lists to numpy arrays
-    X_train = np.array(X_train)
-    Y_train = np.array(Y_train)
-    X_test = np.array(X_test)
-    Y_test = np.array(Y_test)
-    
-    # Transpose these one dimentional array to make them vertical instead of horizontal
-    Y_train = Y_train.T
-    Y_test = Y_test.T
-    
-    return X_train, Y_train, X_test, Y_test, classes
     
 if __name__ == '__main__':
     main()
