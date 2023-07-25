@@ -68,3 +68,77 @@ def junk_code():
     print ("X_test shape: " + str(X_test.shape))
     print ("Y_test shape: " + str(Y_test.shape))
     print(classes)'''
+    
+    
+def model_trainer_and_saver():
+    image_size =  (224, 224)
+    image_shape = image_size + (3,) # Since each picture has three channels
+    batch_size = 32
+    train_dataset = image_dataset_from_directory('dataset/training_set/training_set',
+                                                                        shuffle=True,
+                                                                        batch_size=batch_size,
+                                                                        image_size=image_size,
+                                                                        seed=40,
+                                                                        validation_split=0.2,
+                                                                        subset='training')
+    validation_dataset = image_dataset_from_directory('dataset/training_set/training_set',
+                                                                        shuffle=True,
+                                                                        batch_size=batch_size,
+                                                                        image_size=image_size,
+                                                                        seed=40,
+                                                                        validation_split=0.2,
+                                                                        subset='validation')
+    
+    # Prefetch data
+    #train_dataset = train_dataset.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)
+    
+    model = get_classifier_model(image_shape)
+    
+    
+    
+    base_learning_rate = 0.001
+    optimizer = tf.keras.optimizers.legacy.Adam(learning_rate=base_learning_rate)
+    model.compile(optimizer=optimizer,
+                  loss='binary_crossentropy',
+                  metrics=['accuracy'])
+    
+    print(model.summary())
+    model.fit(train_dataset, validation_data=validation_dataset, epochs=7)
+    model.save('cat_and_dog_classifier')
+    
+def data_augmentor():
+    model = tf.keras.Sequential()
+    model.add(RandomFlip('horizontal'))
+    model.add(RandomRotation(0.2))
+    return model
+
+def get_classifier_model(image_shape, augmentor=data_augmentor()):
+    model = EfficientNetB0(input_shape=image_shape,
+                           include_top=False,
+                           weights='imagenet')
+    
+    # freeze the model (make it untrainable)
+    model.trainable = False
+    inputs = tf.keras.Input(shape=image_shape)
+    x = augmentor(inputs)
+    preprocess = tf.keras.applications.efficientnet.preprocess_input
+    # Preprocess after augmentor
+    x = preprocess(x)
+    x = model(x, training=False)
+    x = tf.keras.layers.GlobalAveragePooling2D()(x) 
+    x = tf.keras.layers.Dropout(0.2)(x)
+    
+    outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+    
+    model = tf.keras.Model(inputs, outputs)
+    
+    # retrain last layers of previous model (EfficientNetB0)
+    previous_model = model.layers[2]
+    previous_model.trainable = True
+    #print(len(previous_model.layers))
+    fine_tune_at = 200
+    for layer in previous_model.layers[:fine_tune_at]:
+        layer.trainable = False
+    model.layers[2] = previous_model
+    
+    return model
