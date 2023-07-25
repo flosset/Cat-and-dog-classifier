@@ -2,12 +2,9 @@ from tkinter import *
 from tkinter import filedialog
 import tensorflow as tf
 from PIL import Image
-from tensorflow.keras import layers
-from tensorflow.keras.layers import Input, Add, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D, MaxPooling2D
 import os
 from not_used import load_datasets
-from tensorflow.keras.preprocessing import image_dataset_from_directory
-from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation
+
 from tensorflow.keras.applications import EfficientNetB0
 import numpy as np
 from tensorflow.keras.preprocessing import image

@@ -1,6 +1,8 @@
 import numpy as np
 import os
 from PIL import Image
+from tensorflow.keras.preprocessing import image_dataset_from_directory
+from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation
 
 def load_datasets(directory):
     
