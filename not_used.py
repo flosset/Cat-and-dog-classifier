@@ -1,8 +1,11 @@
 import numpy as np
 import os
 from PIL import Image
+import tensorflow as tf
 from tensorflow.keras.preprocessing import image_dataset_from_directory
 from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.applications import EfficientNetB0
 
 def load_datasets(directory):
     

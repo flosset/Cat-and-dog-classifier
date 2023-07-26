@@ -2,10 +2,6 @@ from tkinter import *
 from tkinter import filedialog
 import tensorflow as tf
 from PIL import Image, ImageTk
-import os
-
-
-from tensorflow.keras.applications import EfficientNetB0
 import numpy as np
 from tensorflow.keras.preprocessing import image
 
