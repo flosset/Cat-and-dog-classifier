@@ -4,12 +4,13 @@ import tensorflow as tf
 from PIL import Image, ImageTk
 import numpy as np
 from tensorflow.keras.preprocessing import image
+import ttkbootstrap as tb
 
 class MainApp:
     def __init__(self, root):
         self.root = root
-        self.root.title('Identifier')
-        self.root.geometry('800x600')
+        self.root.title('Classifier')
+        self.root.geometry('720x480')
         
         self.frame1 = LabelFrame(root, padx=130, pady=130)
         self.frame1.grid(row=0, column=0, padx=10, pady=20, columnspan=2)
@@ -22,17 +23,17 @@ class MainApp:
         self.frame2 = LabelFrame(root, padx=130, pady=130)
         self.frame2.grid(row=0, column=2, padx=10, pady=20, columnspan=2)
         
-        self.selection_button = Button(self.frame1, text="Select File", command=self.file_dialog_prompt)
+        self.selection_button = tb.Button(self.frame1, text="Select File", command=self.file_dialog_prompt)
         self.selection_button.pack()
         
-        self.result_label = Label(self.frame2, text="Result....")
+        self.result_label = tb.Label(self.frame2, text="Result....")
         self.result_label.pack()
         
         # Stores the name of the animal
         self.result = None
         
         # create a get_result button
-        self.get_result_button = Button(text='Get result', command=self.get_result)
+        self.get_result_button = tb.Button(text='Get result', command=self.get_result)
         self.get_result_button.grid(row=1, column=1, columnspan=2)
         
     def file_dialog_prompt(self):
@@ -45,7 +46,7 @@ class MainApp:
 
     def open_image(self):
         img = Image.open(self.image_location)
-        img = img.resize((300, 300))
+        img = img.resize((300, 270))
         image = ImageTk.PhotoImage(img)
         
         if self.image_label:
@@ -61,10 +62,10 @@ class MainApp:
         # If location variable is not empty
         if self.image_location:
             animal = classify(self.image_location)
-            self.result_label.config(text="It's a " + animal)   
+            self.result_label.config(text="It's a " + animal, font=('Helvetica', 27))   
 
 def main():
-    root = Tk()
+    root = tb.Window(themename='darkly')
     app = MainApp(root)
     root.mainloop()
     
